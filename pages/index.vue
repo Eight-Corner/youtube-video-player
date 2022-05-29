@@ -1,27 +1,70 @@
 <template>
   <div>
-    <h1 style="text-align: center;"> YOUTUBE - VIDEO - PLAYER </h1>
-    <div class="video-container">
-      <div class="video-controls-container">
+    <h1 style="text-align: center;" @keydown.space="togglePlay()"> YOUTUBE - VIDEO - PLAYER </h1>
+    <div class="video-container" :class="{'paused' : paused}">
+      <div class="video-controls-container" @keydown.space="togglePlay()">
         <div class="timeline-container"></div>
-          <div class="controls">
-            <button class="play-pause-btn">
-              <svg class="play-icon" height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><use class="ytp-svg-shadow" xlink:href="#ytp-id-935"></use><path class="ytp-svg-fill" d="M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z" id="ytp-id-935"></path></svg>
-              <svg class="pause-icon" height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><use class="ytp-svg-shadow" xlink:href="#ytp-id-974"></use><path class="ytp-svg-fill" d="M 12,26 16,26 16,10 12,10 z M 21,26 25,26 25,10 21,10 z" id="ytp-id-974"></path></svg>
-            </button>
-            <button class="play-pause-btn">
-              <svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><use class="ytp-svg-shadow" xlink:href="#ytp-id-12"></use><path class="ytp-svg-fill" d="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" id="ytp-id-12"></path></svg>
-            </button>
-          </div>
+        <div class="controls">
+          <button class="play-pause-btn" @click="togglePlay()">
+            <svg class="play-icon" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+            </svg>
+            <svg class="pause-icon" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+            </svg>
+          </button>
+          <button class="theater-btn">
+            <svg class="tall" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/>
+            </svg>
+            <svg class="wide" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z"/>
+            </svg>
+          </button>
+          <button class="full-screen-btn">
+            <svg class="open" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+            <svg class="close" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <video src="@/assets/my_iu.mp4"></video>
+      <video src="@/assets/my_iu.mp4" ref="video" @click="togglePlay" autoplay></video>
     </div>
   </div>
 </template>
 
 <script>
+
 export default {
-  name: 'IndexPage'
+  name: 'IndexPage',
+  data() {
+    return {
+      paused: false,
+    }
+  },
+  mounted() {
+    window.addEventListener('keyup', ((ev) => {
+      switch (ev.keyCode) {
+        case " ": break;
+        case 32: this.togglePlay(); break;
+        default: break;
+      }
+    }));
+  },
+  methods: {
+    togglePlay() {
+      if (this.$refs.video.paused) {
+        this.paused = false;
+        this.$refs.video.play();
+      } else {
+        this.paused = true;
+        this.$refs.video.pause();
+      }
+    },
+  },
 }
 </script>
 
