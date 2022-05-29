@@ -1,4 +1,6 @@
 # 도전과제
+![img.png](https://velog.velcdn.com/images/corner3499/post/06ef325f-1d10-40c4-bb54-e1104f2d013c/image.gif)
+
 
 # Nuxt로 Youtube Video Player 개발하기
 
