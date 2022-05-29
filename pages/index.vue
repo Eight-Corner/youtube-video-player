@@ -5,7 +5,13 @@
          :class="[{'paused' : paused}, {'theater' : theaterMode}, {'full-screen': fullscreen}, {'muted': volume === 0}, {'captions': captions}]"
          ref="video_container">
       <div class="video-controls-container">
-        <div class="timeline-container"></div>
+        <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
+        <div class="timeline-container">
+          <div class="timeline" @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
+            <img class="preview-img" :src="previewImg" ref="previewImg"/>
+            <div class="thumb-indicator"></div>
+          </div>
+        </div>
         <div class="controls">
           <button class="play-pause-btn" @click="togglePlay()">
             <svg class="play-icon" viewBox="0 0 24 24">
@@ -31,7 +37,7 @@
             <input class="volume-slider" ref="volumeSlider" v-model="volume" @change="volumeChange($event)"
                    type="range" min="0" max="1" step="any" value="1" />
           </div>
-          <div class="duration-container">
+          <div class="duration-container" ref="videoDuration">
             <div class="current-time">{{ currentTime }}</div>
             /
             <div class="total-time">{{ totalTime }}</div>
@@ -42,7 +48,9 @@
                     d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
             </svg>
           </button>
-
+          <button class="speed-btn wide-btn" @click="changePlaybackSpeed">
+            {{ speed }}x
+          </button>
           <button class="mini-player-btn" ref="mini" @click="toggleMiniMode">
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"/>
@@ -87,7 +95,11 @@ export default {
       volume: 1,
       currentTime: '0:00',
       totalTime: '',
+      speed: 1,
       captions: {},
+      previewImg: '',
+      thumbnailImg: '',
+      isScrubbing: false,
     }
   },
   mounted() {
@@ -119,6 +131,7 @@ export default {
       }
     }));
 
+
     document.addEventListener("fullscreenchange", () => {
       this.$refs.video_container.classList.toggle('full-screen');
     });
@@ -134,11 +147,63 @@ export default {
     });
     this.$refs.video.addEventListener('timeupdate', () => {
       this.currentTime = this.formatDuration(this.$refs.video.currentTime);
+      const percent = this.$refs.video.currentTime / this.$refs.video.duration;
+      this.$refs.timelineContainer.style.setProperty("--progress-position", percent)
     });
     this.captions = this.$refs.video.textTracks[0];
     this.captions.mode = "hidden";
+
+    this.$refs.timelineContainer.addEventListener("mousemove", this.handleTimelineUpdate);
+    this.$refs.timelineContainer.addEventListener("mousedown", this.toggleScrubbing);
+    document.addEventListener("mouseup", e => {
+      if (this.isScrubbing) {  this.toggleScrubbing(e) ; }
+    });
+    document.addEventListener("mousemove", e => {
+      if (this.isScrubbing) {  this.handleTimelineUpdate(e) ; }
+    });
   },
   methods: {
+    toggleScrubbing(e) {
+      const rect = this.$refs.timelineContainer.getBoundingClientRect();
+      const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+      this.isScrubbing = (e.buttons & 1) === 1;
+      this.$refs.videoContainer.classList.toggle("scrubbing", this.isScrubbing);
+      let wasPaused;
+      if (this.isScrubbing) {
+        wasPaused = this.$refs.video.paused;
+        this.$refs.video.pause();
+      } else {
+        this.$refs.video.currentTime = percent * this.$refs.video.duration;
+        if (!wasPaused) {
+          this.$refs.video.play();
+        }
+      }
+
+      this.handleTimelineUpdate(e)
+    },
+    handleTimelineUpdate(e) {
+      const rect = this.$refs.timelineContainer.getBoundingClientRect();
+      const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width
+      const previewImgNumber = Math.max(
+        1,
+        Math.floor((percent * this.$refs.video.duration) / 10)
+      )
+      this.previewImg = `@/assets/previewImgs/preview${previewImgNumber}.jpg`;
+      this.$refs.timelineContainer.style.setProperty('--percent', percent);
+
+      if (this.isScrubbing) {
+        e.preventDefault();
+        this.thumbnailImg = this.previewImg;
+      }
+    },
+    changePlaybackSpeed() {
+      let newPlaybackRate = this.$refs.video.playbackRate + 0.25;
+      if (newPlaybackRate > 2) {
+        newPlaybackRate = 0.25;
+      }
+      this.$refs.video.playbackRate = newPlaybackRate;
+      this.speed = newPlaybackRate;
+    },
     toggleCaptions() {
       const isHidden = this.captions.mode === 'hidden';
       this.captions.mode = isHidden ? 'showing' : 'hidden';
