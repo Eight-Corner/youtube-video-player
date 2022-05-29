@@ -31,6 +31,11 @@
             <input class="volume-slider" ref="volumeSlider" v-model="volume" @change="volumeChange($event)"
                    type="range" min="0" max="1" step="any" value="1" />
           </div>
+          <div class="duration-container">
+            <div class="current-time">{{ currentTime }}</div>
+            /
+            <div class="total-time">{{ totalTime }}</div>
+          </div>
           <button class="mini-player-btn" ref="mini" @click="toggleMiniMode">
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"/>
@@ -70,7 +75,8 @@ export default {
       fullscreen : false,
       miniMode : false,
       volume: 1,
-      muted: false,
+      currentTime: '',
+      totalTime: '',
     }
   },
   mounted() {
@@ -103,8 +109,29 @@ export default {
     this.$refs.video.addEventListener('leavepictureinpicture', () => {
       this.$refs.video_container.classList.remove("mini-player");
     });
+
+    this.$refs.video.addEventListener('loadeddata', () => {
+      this.totalTime = this.formatDuration(this.$refs.video.duration);
+    });
+    this.$refs.video.addEventListener('timeupdate', () => {
+      this.currentTime = this.formatDuration(this.$refs.video.currentTime);
+    });
+
   },
   methods: {
+    formatDuration(time) {
+      const seconds = Math.floor(time % 60);
+      const minutes = Math.floor(time / 60) % 60;
+      const hours = Math.floor(time / 3600);
+      const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
+        minimumIntegerDigits: 2,
+      });
+      if (hours === 0) {
+        return `${minutes}:${leadingZeroFormatter.format(seconds)}`;
+      } else {
+        return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`;
+      }
+    },
     togglePlay() {
       if (this.$refs.video.paused) {
         this.paused = false;
