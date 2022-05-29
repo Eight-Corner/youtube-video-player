@@ -2,7 +2,7 @@
   <div>
     <h1 style="text-align: center;"> YOUTUBE - VIDEO - PLAYER </h1>
     <div class="video-container"  data-volume-level="high"
-         :class="[{'paused' : paused}, {'theater' : theaterMode}, {'full-screen': fullscreen}, {'muted': volume === 0}]"
+         :class="[{'paused' : paused}, {'theater' : theaterMode}, {'full-screen': fullscreen}, {'muted': volume === 0}, {'captions': captions}]"
          ref="video_container">
       <div class="video-controls-container">
         <div class="timeline-container"></div>
@@ -36,6 +36,13 @@
             /
             <div class="total-time">{{ totalTime }}</div>
           </div>
+          <button class="captions-btn" @click="toggleCaptions">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor"
+                    d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
+            </svg>
+          </button>
+
           <button class="mini-player-btn" ref="mini" @click="toggleMiniMode">
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"/>
@@ -57,9 +64,12 @@
               <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
             </svg>
           </button>
+
         </div>
       </div>
-      <video src="@/assets/my_iu.mp4" ref="video" @click="togglePlay" autoplay></video>
+      <video src="@/assets/my_iu.mp4" ref="video" @click="togglePlay" autoplay>
+        <track kind="captions" srclang="en" src="assets/subtitles.vtt"></track>
+      </video>
     </div>
   </div>
 </template>
@@ -75,8 +85,9 @@ export default {
       fullscreen : false,
       miniMode : false,
       volume: 1,
-      currentTime: '',
+      currentTime: '0:00',
       totalTime: '',
+      captions: {},
     }
   },
   mounted() {
@@ -99,6 +110,8 @@ export default {
         case "arrowright":
           case "l":
             this.skip(5); break;
+        case "c": this.toggleCaptions(); break;
+
         default: break;
       }
       if (ev.keyCode === 32) {
@@ -122,9 +135,15 @@ export default {
     this.$refs.video.addEventListener('timeupdate', () => {
       this.currentTime = this.formatDuration(this.$refs.video.currentTime);
     });
-
+    this.captions = this.$refs.video.textTracks[0];
+    this.captions.mode = "hidden";
   },
   methods: {
+    toggleCaptions() {
+      const isHidden = this.captions.mode === 'hidden';
+      this.captions.mode = isHidden ? 'showing' : 'hidden';
+      this.$refs.video_container.classList.toggle("captions", isHidden);
+    },
     skip(duration) {
       this.$refs.video.currentTime += duration;
     },
