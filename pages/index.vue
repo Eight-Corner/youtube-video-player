@@ -89,10 +89,16 @@ export default {
         case " ": if(tagName === "button") return;
           break;
         case "t" : this.toggleTheater(); break;
-        case "p": this.togglePlay(); break;
         case "i": this.toggleMiniMode(); break;
         case "f": this.toggleFullScreen(); break;
         case "m": this.toggleMute(); break;
+        case "arrowleft":
+        case "j" :
+          this.skip(-5); break;
+        case "k": this.togglePlay(); break;
+        case "arrowright":
+          case "l":
+            this.skip(5); break;
         default: break;
       }
       if (ev.keyCode === 32) {
@@ -119,6 +125,9 @@ export default {
 
   },
   methods: {
+    skip(duration) {
+      this.$refs.video.currentTime += duration;
+    },
     formatDuration(time) {
       const seconds = Math.floor(time % 60);
       const minutes = Math.floor(time / 60) % 60;
