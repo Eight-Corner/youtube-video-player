@@ -88,7 +88,7 @@ export default {
   name: 'IndexPage',
   data() {
     return {
-      paused: false,
+      paused: true,
       theaterMode: false,
       fullscreen : false,
       miniMode : false,
