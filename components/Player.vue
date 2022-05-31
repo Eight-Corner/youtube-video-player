@@ -2,7 +2,7 @@
   <div>
     <h1 style="text-align: center;"> YOUTUBE - VIDEO - PLAYER </h1>
     <div class="video-container"  data-volume-level="high"
-         :class="[{'paused' : paused}, {'theater' : theaterMode},
+         :class="[{'paused' : paused && !playState}, {'theater' : theaterMode},
          {'full-screen': fullscreen}, {'muted': volume === 0},
          {'captions': captions}, { scrubbing: isScrubbing }]"
          ref="video_container">
@@ -77,7 +77,7 @@
 
         </div>
       </div>
-      <video src="@/assets/my_video.mp4" ref="video" @click="togglePlay" autoplay>
+      <video src="@/assets/my_iu.mp4" ref="video" @click="togglePlay" :autoplay="playState">
         <track kind="captions" srclang="en" src="assets/subtitles.vtt"></track>
       </video>
     </div>
@@ -90,20 +90,22 @@ export default {
   name: 'Player',
   data() {
     return {
-      paused: false,
-      theaterMode: false,
-      fullscreen : false,
-      miniMode : false,
-      volume: 1,
-      currentTime: '0:00',
-      totalTime: '',
-      speed: 1,
-      captions: {},
-      previewImg: '',
-      thumbnailImg: '',
-      isScrubbing: false,
+        playState: false,
+        paused: true,
+        theaterMode: false,
+        fullscreen: false,
+        miniMode: false,
+        volume: 1,
+        currentTime: '0:00',
+        totalTime: '',
+        speed: 1,
+        captions: {},
+        previewImg: '',
+        thumbnailImg: '',
+        isScrubbing: false,
     }
   },
+
   mounted() {
 
     window.addEventListener('keyup', ((ev) => {
@@ -168,7 +170,7 @@ export default {
       const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
       this.isScrubbing = (e.buttons & 1) === 1;
       this.$refs.video_container.classList.toggle("scrubbing", this.isScrubbing);
-      if (this.isScrubbing) {
+      if (this.isScrubbing && this.$refs.video.paused) {
         this.$refs.video.pause();
       } else {
         this.$refs.video.currentTime = percent * this.$refs.video.duration;
@@ -226,9 +228,11 @@ export default {
     togglePlay() {
       if (this.$refs.video.paused) {
         this.paused = false;
+          this.playState = true;
         this.$refs.video.play();
       } else {
         this.paused = true;
+          this.playState = false;
         this.$refs.video.pause();
       }
     },
