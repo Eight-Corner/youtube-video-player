@@ -6,8 +6,8 @@
          ref="video_container">
       <div class="video-controls-container">
         <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
-        <div class="timeline-container">
-          <div class="timeline" @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
+        <div class="timeline-container"  @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
+          <div class="timeline">
             <img class="preview-img" :src="previewImg" ref="previewImg"/>
             <div class="thumb-indicator"></div>
           </div>
@@ -88,7 +88,7 @@ export default {
   name: 'Player',
   data() {
     return {
-      paused: true,
+      paused: false,
       theaterMode: false,
       fullscreen : false,
       miniMode : false,
@@ -194,6 +194,7 @@ export default {
       if (this.isScrubbing) {
         e.preventDefault();
         this.thumbnailImg = this.previewImg;
+        this.timeline.style.setProperty('--progress-position', percent)
       }
     },
     changePlaybackSpeed() {
