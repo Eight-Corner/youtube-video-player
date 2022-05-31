@@ -6,8 +6,8 @@
          ref="video_container">
       <div class="video-controls-container">
         <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
-        <div class="timeline-container"  @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
-          <div class="timeline">
+        <div class="timeline-container">
+          <div class="timeline" @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
             <img class="preview-img" :src="previewImg" ref="previewImg"/>
             <div class="thumb-indicator"></div>
           </div>
