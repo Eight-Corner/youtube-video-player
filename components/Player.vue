@@ -2,13 +2,15 @@
   <div>
     <h1 style="text-align: center;"> YOUTUBE - VIDEO - PLAYER </h1>
     <div class="video-container"  data-volume-level="high"
-         :class="[{'paused' : paused}, {'theater' : theaterMode}, {'full-screen': fullscreen}, {'muted': volume === 0}, {'captions': captions}]"
+         :class="[{'paused' : paused}, {'theater' : theaterMode},
+         {'full-screen': fullscreen}, {'muted': volume === 0},
+         {'captions': captions}, { scrubbing: isScrubbing }]"
          ref="video_container">
+      <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
       <div class="video-controls-container">
-        <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
-        <div class="timeline-container">
-          <div class="timeline" @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)" ref="timelineContainer">
-            <img class="preview-img" :src="previewImg" ref="previewImg"/>
+        <div class="timeline-container" ref="timelineContainer">
+          <div class="timeline" @mousemove="handleTimelineUpdate($event)" @mousedown="toggleScrubbing($event)">
+            <img class="preview-img" :src="previewImg" alt="" ref="previewImg"/>
             <div class="thumb-indicator"></div>
           </div>
         </div>
@@ -135,6 +137,7 @@ export default {
     document.addEventListener("fullscreenchange", () => {
       this.$refs.video_container.classList.toggle('full-screen');
     });
+
     this.$refs.video.addEventListener('enterpictureinpicture', () => {
       this.$refs.video_container.classList.add("mini-player");
     });
@@ -153,8 +156,8 @@ export default {
     this.captions = this.$refs.video.textTracks[0];
     this.captions.mode = "hidden";
 
-    this.$refs.timelineContainer.addEventListener("mousemove", this.handleTimelineUpdate);
-    this.$refs.timelineContainer.addEventListener("mousedown", this.toggleScrubbing);
+    // this.$refs.timelineContainer.addEventListener("mousemove", this.handleTimelineUpdate);
+    // this.$refs.timelineContainer.addEventListener("mousedown", this.toggleScrubbing);
     document.addEventListener("mouseup", e => {
       if (this.isScrubbing) {  this.toggleScrubbing(e) ; }
     });
@@ -166,35 +169,33 @@ export default {
     toggleScrubbing(e) {
       const rect = this.$refs.timelineContainer.getBoundingClientRect();
       const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+      console.log((e.buttons & 1) === 1);
       this.isScrubbing = (e.buttons & 1) === 1;
-      this.$refs.videoContainer.classList.toggle("scrubbing", this.isScrubbing);
-      let wasPaused;
+      this.$refs.video_container.classList.toggle("scrubbing", this.isScrubbing);
       if (this.isScrubbing) {
-        wasPaused = this.$refs.video.paused;
         this.$refs.video.pause();
       } else {
         this.$refs.video.currentTime = percent * this.$refs.video.duration;
-        if (!wasPaused) {
+        if (!this.$refs.video.paused) {
           this.$refs.video.play();
         }
       }
 
-      this.handleTimelineUpdate(e)
+      this.handleTimelineUpdate(e);
     },
     handleTimelineUpdate(e) {
-      const rect = this.$refs.timelineContainer.getBoundingClientRect();
-      const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width
-      const previewImgNumber = Math.max(
-        1,
-        Math.floor((percent * this.$refs.video.duration) / 10)
-      )
-      this.previewImg = `@/assets/previewImgs/preview${previewImgNumber}.jpg`;
-      this.$refs.timelineContainer.style.setProperty('--percent', percent);
+      let timeline = this.$refs.timelineContainer;
+      const rect = timeline.getBoundingClientRect();
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+      const previewImgNumber = Math.max(1, Math.floor((percent * this.$refs.video.duration) / 10));
+      this.previewImg = require(`assets/previewImgs/preview${previewImgNumber}.jpg`);
+      timeline.style.setProperty('--preview-position', percent);
 
       if (this.isScrubbing) {
         e.preventDefault();
         this.thumbnailImg = this.previewImg;
-        this.timeline.style.setProperty('--progress-position', percent)
+        timeline.style.setProperty('--progress-position', percent)
       }
     },
     changePlaybackSpeed() {

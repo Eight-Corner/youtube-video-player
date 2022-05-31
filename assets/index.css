@@ -133,6 +133,7 @@ video {
   transform-origin: left;
   transform: scaleX(0);
   transition: width 150ms ease-in-out, transform 150ms ease-in-out;
+  color: #FFFFFF;
 }
 
 .volume-container:hover .volume-slider,
@@ -172,7 +173,7 @@ video {
 }
 
 .timeline::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
@@ -181,9 +182,8 @@ video {
   background-color: rgb(150, 150, 150);
   display: none;
 }
-
 .timeline::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
@@ -204,7 +204,6 @@ video {
   transition: transform 150ms ease-in-out;
   aspect-ratio: 1 / 1;
 }
-
 .timeline .preview-img {
   position: absolute;
   height: 80px;
@@ -212,10 +211,11 @@ video {
   top: -1rem;
   transform: translate(-50%, -100%);
   left: calc(var(--preview-position) * 100%);
-  border-radius: .25rem;
+  border-radius: 0.25rem;
   border: 2px solid white;
   display: none;
 }
+
 
 .thumbnail-img {
   position: absolute;
