@@ -118,12 +118,12 @@ export default {
         case "f": this.toggleFullScreen(); break;
         case "m": this.toggleMute(); break;
         case "arrowleft":
-        case "j" :
-          this.skip(-5); break;
-        case "k": this.togglePlay(); break;
+            case "j" :
+                this.skip(-5); break;
         case "arrowright":
-        case "l":
-          this.skip(5); break;
+            case "l":
+                this.skip(5); break;
+        case "k": this.togglePlay(); break;
         case "c": this.toggleCaptions(); break;
 
         default: break;
@@ -132,7 +132,6 @@ export default {
         this.togglePlay();
       }
     }));
-
 
     document.addEventListener("fullscreenchange", () => {
       this.$refs.video_container.classList.toggle('full-screen');
@@ -156,8 +155,6 @@ export default {
     this.captions = this.$refs.video.textTracks[0];
     this.captions.mode = "hidden";
 
-    // this.$refs.timelineContainer.addEventListener("mousemove", this.handleTimelineUpdate);
-    // this.$refs.timelineContainer.addEventListener("mousedown", this.toggleScrubbing);
     document.addEventListener("mouseup", e => {
       if (this.isScrubbing) {  this.toggleScrubbing(e) ; }
     });
@@ -169,7 +166,6 @@ export default {
     toggleScrubbing(e) {
       const rect = this.$refs.timelineContainer.getBoundingClientRect();
       const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-      console.log((e.buttons & 1) === 1);
       this.isScrubbing = (e.buttons & 1) === 1;
       this.$refs.video_container.classList.toggle("scrubbing", this.isScrubbing);
       if (this.isScrubbing) {
