@@ -85,7 +85,7 @@
 <script>
 
 export default {
-  name: 'VideoPlayer',
+  name: 'Player',
   data() {
     return {
       paused: true,
