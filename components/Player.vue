@@ -77,7 +77,7 @@
 
         </div>
       </div>
-      <video src="@/assets/my_iu.mp4" ref="video" @click="togglePlay" autoplay>
+      <video src="@/assets/my_video.mp4" ref="video" @click="togglePlay" autoplay>
         <track kind="captions" srclang="en" src="assets/subtitles.vtt"></track>
       </video>
     </div>
