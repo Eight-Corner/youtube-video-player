@@ -17,6 +17,10 @@ export default {
     ]
   },
 
+  server: {
+      port: 8000 // default: 3000
+  },
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
     'ant-design-vue/dist/antd.css',
