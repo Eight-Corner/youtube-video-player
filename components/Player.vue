@@ -4,7 +4,7 @@
     <div class="video-container"  data-volume-level="high"
          :class="[{'paused' : paused && !playState}, {'theater' : theaterMode},
          {'full-screen': fullscreen}, {'muted': volume === 0},
-         {'captions': captions}, { scrubbing: isScrubbing }]"
+         {'captions': captions.mode === 'showing'}, { scrubbing: isScrubbing }]"
          ref="video_container">
       <img class="thumbnail-img" :src="thumbnailImg" ref="thumbnailImg" />
       <div class="video-controls-container">
@@ -78,7 +78,7 @@
         </div>
       </div>
       <video src="@/assets/my_video.mp4" ref="video" @click="togglePlay" :autoplay="playState">
-        <track kind="captions" srclang="en" src="assets/subtitles.vtt"></track>
+        <track kind="captions" srclang="en" src="@/assets/subtitles.vtt" default></track>
       </video>
     </div>
   </div>
@@ -99,7 +99,9 @@ export default {
         currentTime: '0:00',
         totalTime: '',
         speed: 1,
-        captions: {},
+        captions: {
+            'mode': 'hidden',
+        },
         previewImg: '',
         thumbnailImg: '',
         isScrubbing: false,
@@ -118,6 +120,8 @@ export default {
         case "t" : this.toggleTheater(); break;
         case "i": this.toggleMiniMode(); break;
         case "f": this.toggleFullScreen(); break;
+          case "arrowup": this.volumeChange(0.1); break;
+          case "arrowdown": this.volumeChange(-0.1); break;
         case "m": this.toggleMute(); break;
         case "arrowleft":
             case "j" :
@@ -125,7 +129,8 @@ export default {
         case "arrowright":
             case "l":
                 this.skip(5); break;
-        case "k": this.togglePlay(); break;
+        case "p":
+            case "k": this.togglePlay(); break;
         case "c": this.toggleCaptions(); break;
 
         default: break;
@@ -237,41 +242,51 @@ export default {
       }
     },
     // volume control
-    toggleMute() {
-      const videoContainer = this.$refs.video_container;
-      const video = this.$refs.video;
-      if (!video.muted) {
-        this.volume = 0;
-        videoContainer.dataset.volumeLevel = 'muted';
-      } else {
-        this.volume = video.volume;
-        if (video.volume > .5) {
-          videoContainer.dataset.volumeLevel = 'high';
-        } else {
-          videoContainer.dataset.volumeLevel = 'low';
-        }
-      }
-      this.$refs.video.muted = !this.$refs.video.muted;
-    },
-    volumeChange(e) {
-      this.value = e.target.value;
-      this.$refs.video.volume = e.target.value;
-      this.$refs.video.muted = e.target.value === 0;
+      toggleMute() {
+          const videoContainer = this.$refs.video_container;
+          const video = this.$refs.video;
+          if (!video.muted) {
+              this.volume = 0;
+              videoContainer.dataset.volumeLevel = 'muted';
+          } else {
+              this.volume = video.volume;
+              if (video.volume > .5) {
+                  videoContainer.dataset.volumeLevel = 'high';
+              } else {
+                  videoContainer.dataset.volumeLevel = 'low';
+              }
+          }
+          this.$refs.video.muted = !this.$refs.video.muted;
+      },
+      volumeChange(e) {
+          const video = this.$refs.video;
+          if (this.volume < 0 && e === -0.1) {
+              this.volume = 0;
+          }
+          else if (e === 0.1 && this.volume > 1) {
+              this.volume = 1;
+          }
+          else if (e === 0.1 || e === -0.1) {
+              this.volume = this.volume + e;
+          } else {
+              this.volume = e.target.value;
+          }
+          video.volume = this.volume;
+          video.muted = this.volume === 0;
+          this.$refs.volumeSlider.value = video.volume;
+          let volumeLevel;
+          if (video.muted || video.volume === 0) {
+              this.$refs.volumeSlider.value = 0;
+              volumeLevel = "muted";
+          } else if (video.volume > .5) {
+              volumeLevel = "high";
+          } else {
+              volumeLevel = "low";
+          }
 
-      this.$refs.volumeSlider.value = this.$refs.video.volume;
-      let volumeLevel;
-      if (this.$refs.video.muted || this.$refs.video.volume === 0) {
-        this.$refs.volumeSlider.value = 0;
-        volumeLevel = "muted";
-      } else if (this.$refs.video.volume > .5){
-        volumeLevel = "high";
-      } else {
-        volumeLevel = "low";
-      }
+          this.$refs.video_container.dataset.volumeLevel = volumeLevel;
 
-      this.$refs.video_container.dataset.volumeLevel = volumeLevel;
-
-    },
+      },
     // view Mode
     toggleTheater() {
       this.$refs.video_container.classList.toggle('theater');
