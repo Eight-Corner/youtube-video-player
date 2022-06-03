@@ -44,7 +44,7 @@
             /
             <div class="total-time">{{ totalTime }}</div>
           </div>
-          <button class="captions-btn" @click="toggleCaptions">
+          <button class="captions-btn" data-state="captions" @click="toggleCaptions">
             <svg viewBox="0 0 24 24">
               <path fill="currentColor"
                     d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
@@ -78,7 +78,8 @@
         </div>
       </div>
       <video src="@/assets/my_video.mp4" ref="video" @click="togglePlay" :autoplay="playState">
-        <track kind="captions" srclang="en" src="@/assets/subtitles.vtt" default></track>
+<!--        <track kind="captions" srclang="en" src="@/assets/subtitles.vtt" default></track>-->
+          <track kind="captions" srclang="ko" label="Korean" :src=trackUrl default></track>
       </video>
     </div>
   </div>
@@ -105,11 +106,12 @@ export default {
         previewImg: '',
         thumbnailImg: '',
         isScrubbing: false,
+        trackUrl: '',
     }
   },
 
   mounted() {
-
+    this.trackUrl = require('@/assets/subtitles.vtt');
     window.addEventListener('keyup', ((ev) => {
       const key = ev.key.toLowerCase()
       const tagName = window.document.activeElement.tagName.toLowerCase();
@@ -159,8 +161,15 @@ export default {
       const percent = this.$refs.video.currentTime / this.$refs.video.duration;
       this.$refs.timelineContainer.style.setProperty("--progress-position", percent)
     });
+
     this.captions = this.$refs.video.textTracks[0];
     this.captions.mode = "hidden";
+
+    var myPlayer = this.$refs.video;
+    myPlayer.on('loadedmetadata', function() {
+      myPlayer.textTracks[0].mode = 'showing';
+    });
+
 
     document.addEventListener("mouseup", e => {
       if (this.isScrubbing) {  this.toggleScrubbing(e) ; }
@@ -212,6 +221,7 @@ export default {
     toggleCaptions() {
       const isHidden = this.captions.mode === 'hidden';
       this.captions.mode = isHidden ? 'showing' : 'hidden';
+      this.$refs.video.textTracks[0].mode = 'showing';
       this.$refs.video_container.classList.toggle("captions", isHidden);
     },
     skip(duration) {

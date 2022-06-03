@@ -1,23 +1,18 @@
 WEBVTT
 
-1
 00:00:00.000 --> 00:00:00.970
 - In the last video,
 
-2
 00:00:00.970 --> 00:00:02.660
 I talked all about the window object
 
-3
 00:00:02.660 --> 00:00:04.680
 and how you can pretty much
 just ignore it completely.
 
-4
 00:00:04.680 --> 00:00:05.520
 And in this video,
 
-5
 00:00:05.520 --> 00:00:07.220
 we wanna talk about the document object,
 
